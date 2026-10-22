@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SentinelAI — Security Gateway</title>
+<style>
+:root{--bg:#08111f;--panel:#101d30;--panel2:#14243a;--line:#263c56;--text:#e8f1ff;--muted:#93a9c5;--cyan:#38d5ef;--green:#43d39e;--red:#ff647c;--amber:#ffc36a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#142a47 0,#08111f 42%);font-family:Inter,system-ui,Segoe UI,sans-serif;color:var(--text)}
+main{max-width:1180px;margin:auto;padding:28px 20px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.brand{display:flex;gap:13px;align-items:center}.shield{width:48px;height:48px;border:1px solid #2b7894;border-radius:14px;display:grid;place-items:center;color:var(--cyan);font-size:25px;background:#0d293b}
+h1{font-size:25px;margin:0;letter-spacing:.2px}.sub{color:var(--muted);font-size:13px;margin-top:4px}.pill{border:1px solid #2c526b;color:var(--cyan);padding:7px 11px;border-radius:999px;font-size:12px}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.panel{background:linear-gradient(160deg,#112139,#0d192a);border:1px solid var(--line);border-radius:17px;padding:20px;box-shadow:0 14px 40px #0002}.panel h2{font-size:16px;margin:0 0 17px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.metric{padding:13px;background:#0a1728;border:1px solid var(--line);border-radius:12px}.metric span{display:block;color:var(--muted);font-size:11px}.metric strong{font-size:25px;display:block;margin-top:7px}
+label{display:block;color:#b5c7df;font-size:12px;margin:12px 0 6px}input,select{width:100%;background:#091626;color:var(--text);border:1px solid #2c435e;border-radius:9px;padding:11px;font:inherit;font-size:13px;outline:none}input:focus,select:focus{border-color:var(--cyan)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.btn{border:1px solid #2b526d;background:#15354b;color:#dffaff;padding:10px 13px;border-radius:9px;cursor:pointer;font-weight:650;font-size:12px}.btn.primary{background:var(--cyan);color:#05202b;border-color:var(--cyan)}.btn:hover{filter:brightness(1.1)}.btn:disabled{opacity:.5;cursor:wait}
+.result{margin-top:16px;padding:15px;border:1px solid var(--line);border-radius:12px;background:#091626;min-height:82px}.result strong{font-size:17px}.allow{color:var(--green)}.block{color:var(--red)}.approval{color:var(--amber)}.muted{color:var(--muted);font-size:12px;line-height:1.5}.approval-actions{display:flex;gap:8px;margin-top:12px}
+.audit{grid-column:1/-1}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px;min-width:700px}th{text-align:left;color:var(--muted);font-weight:500;background:#0b1829}td,th{padding:12px 10px;border-bottom:1px solid #20334a}td{color:#d9e6f8}.tag{display:inline-block;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750;background:#203047}.tag.ALLOW{color:var(--green);background:#10372f}.tag.BLOCK{color:var(--red);background:#421e2a}.tag.HUMAN{color:var(--amber);background:#44331c}.footer{margin-top:18px;color:#7f96b3;font-size:11px;line-height:1.6}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.audit{grid-column:auto}.metrics{gap:7px}.metric{padding:10px}.metric strong{font-size:21px}}@media(max-width:430px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<header class="top"><div class="brand"><div class="shield">⬡</div><div><h1>SentinelAI</h1><div class="sub">The Firewall for AI Agents · Policy & Risk Control</div></div></div><div class="pill">● DEMO GATEWAY</div></header>
+<div class="metrics">
+ <div class="metric"><span>Requests Evaluated</span><strong id="total">0</strong></div>
+ <div class="metric"><span>Blocked</span><strong id="blocked" style="color:var(--red)">0</strong></div>
+ <div class="metric"><span>Awaiting Review</span><strong id="pending" style="color:var(--amber)">0</strong></div>
+</div>
+<div class="grid">
+<section class="panel"><h2>⌁ Submit an Agent Action</h2>
+<div class="row"><div><label for="agent">Agent name</label><input id="agent" value="Demo Agent"></div><div><label for="sensitivity">Data sensitivity</label><select id="sensitivity"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div></div>
+<label for="action">Requested action</label><select id="action"><option value="read_file">Read file (permitted)</option><option value="search">Search (permitted)</option><option value="delete_file">Delete file (prohibited)</option><option value="export_data">Export data (review)</option><option value="send_email">Send email (review)</option><option value="update_record">Update record (review)</option><option value="delete_database">Delete database (prohibited)</option><option value="read_record">Read record (permitted)</option></select>
+<label for="resource">Target resource</label><input id="resource" value="public_report.pdf">
+<div class="btns"><button class="btn primary" id="evaluate">Evaluate Request →</button><button class="btn" id="allowDemo">Try Allow</button><button class="btn" id="blockDemo">Try Block</button><button class="btn" id="reviewDemo">Try Approval</button></div>
+<div class="result" id="result"><span class="muted">Ready. Submit an action to see the policy decision.</span></div>
+</section>
+<section class="panel"><h2>◈ Policy Snapshot</h2>
+<div style="display:grid;gap:10px">
+<div class="metric"><strong style="font-size:14px;color:var(--green)">ALLOW</strong><div class="muted">Allowlisted, low-risk read/search actions.</div></div>
+<div class="metric"><strong style="font-size:14px;color:var(--red)">BLOCK</strong><div class="muted">Prohibited actions, credential resources, or actions not allowlisted.</div></div>
+<div class="metric"><strong style="font-size:14px;color:var(--amber)">HUMAN APPROVAL</strong><div class="muted">High/medium sensitivity and sensitive write/export operations.</div></div>
+</div><p class="muted" style="margin-top:14px">Requests are evaluated before the demo action is simulated. Sensitive operations remain pending until a reviewer acts.</p>
+</section>
+<section class="panel audit"><h2>▤ Security Audit Log <span class="muted" id="apiStatus" style="float:right">Connecting…</span></h2><div class="tablewrap"><table><thead><tr><th>ID / TIME</th><th>ACTION</th><th>RESOURCE</th><th>RISK</th><th>DECISION</th><th>STATUS</th></tr></thead><tbody id="logs"><tr><td colspan="6" class="muted">No events yet.</td></tr></tbody></table></div><div class="footer">Prototype notice: this MVP uses a simulated agent and in-memory audit storage. It is not connected to real business systems and is not a production security boundary.</div></section>
+</div>
+</main>
+<script>
+const API = new URLSearchParams(location.search).get("api") || "http://127.0.0.1:8000";
+let latestPending = null;
+const $ = id => document.getElementById(id);
+function decisionClass(d){return d==="ALLOW"?"allow":d==="BLOCK"?"block":"approval"}
+function tagClass(d){return d==="ALLOW"?"ALLOW":d==="BLOCK"?"BLOCK":"HUMAN"}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+async function api(path, opts={}){const r=await fetch(API+path,{...opts,headers:{"Content-Type":"application/json",...(opts.headers||{})}});if(!r.ok){const t=await r.text();throw new Error(t||r.statusText)}return r.json()}
+async function refresh(){
+ try{
+ const data=await api("/audit");$("apiStatus").textContent="● API CONNECTED";$("apiStatus").style.color="var(--green)";
+ $("total").textContent=data.length;$("blocked").textContent=data.filter(x=>x.decision==="BLOCK").length;$("pending").textContent=data.filter(x=>x.status==="PENDING").length;
+ $("logs").innerHTML=data.length?data.map(x=>`<tr><td>#${x.id}<br><span class="muted">${esc(new Date(x.timestamp).toLocaleTimeString())}</span></td><td>${esc(x.action)}</td><td>${esc(x.resource)}</td><td>${esc(x.risk.toUpperCase())}</td><td><span class="tag ${tagClass(x.decision)}">${esc(x.decision)}</span></td><td>${esc(x.status)}${x.status==="PENDING"?`<div class="approval-actions"><button class="btn" onclick="resolve(${x.id},true)">Approve</button><button class="btn" onclick="resolve(${x.id},false)">Reject</button></div>`:""}</td></tr>`).join(""):'<tr><td colspan="6" class="muted">No events yet. Submit a request to start.</td></tr>';
+ }catch(e){$("apiStatus").textContent="● API OFFLINE";$("apiStatus").style.color="var(--red");}
+}
+function showResult(x){const cls=decisionClass(x.decision);$("result").innerHTML=`<strong class="${cls}">${esc(x.decision)}</strong><div style="margin-top:6px;font-size:13px">${esc(x.reason)}</div><div class="muted" style="margin-top:7px">Risk: ${esc(x.risk.toUpperCase())} · Event #${x.id} · ${esc(x.status)}</div>`;latestPending=x.decision==="HUMAN APPROVAL"?x.id:null}
+async function submit(overrides={}){
+ $("evaluate").disabled=true;
+ try{const payload={agent:$("agent").value||"Demo Agent",action:$("action").value,resource:$("resource").value||"public_report.pdf",sensitivity:$("sensitivity").value,requested_by:"demo-user",...overrides};const x=await api("/evaluate",{method:"POST",body:JSON.stringify(payload)});showResult(x);await refresh()}
+ catch(e){$("result").innerHTML=`<strong class="block">API ERROR</strong><div class="muted">${esc(e.message)}. Start the backend and reload.</div>`}
+ finally{$("evaluate").disabled=false}
+}
+window.resolve=async(id,approved)=>{try{const x=await api("/approval/"+id,{method:"POST",body:JSON.stringify({approved,reviewer:"Demo Reviewer"})});showResult(x);await refresh()}catch(e){alert("Could not resolve approval: "+e.message)}};
+$("evaluate").addEventListener("click",()=>submit());
+$("allowDemo").addEventListener("click",()=>{ $("action").value="read_file";$("resource").value="public_report.pdf";$("sensitivity").value="low";submit()});
+$("blockDemo").addEventListener("click",()=>{ $("action").value="delete_file";$("resource").value="customer_records.csv";$("sensitivity").value="low";submit()});
+$("reviewDemo").addEventListener("click",()=>{ $("action").value="export_data";$("resource").value="quarterly_report.csv";$("sensitivity").value="high";submit()});
+refresh();setInterval(refresh,5000);
+</script></body></html>
